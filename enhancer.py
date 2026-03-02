@@ -15,7 +15,7 @@ DEFAULT_MODEL = "llama-3.3-70b-versatile"
 def enhance_resume(resume_text: str, target_role: str, model: str = DEFAULT_MODEL) -> str:
 
     load_dotenv()  # loads GROQ_API_KEY from .env
-
+    
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         raise RuntimeError("Missing GROQ_API_KEY. Create a .env file in the project root with GROQ_API_KEY=...")

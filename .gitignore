@@ -14,6 +14,12 @@ build/
 dist/
 *.egg-info/
 
+# Local prompts
+sample_prompts/
+
+# Streamlit
+.streamlit/
+
 # Resume uploads/downloads (user data)
 resumes/
 

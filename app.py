@@ -36,7 +36,7 @@ def read_uploaded_file(uploaded_file) -> ResumeDocument:
     raise ValueError("Only .txt or .pdf supported")
 
 
-st.set_page_config(page_title="InfinityBit Resume Enhancer", layout="centered")
+st.set_page_config(page_title="Resume Enhancer", layout="centered")
 
 st.title("AI-Powered Resume Enhancer")
 st.caption("Upload a resume (.pdf / .txt), choose a target role, get an enhanced version + a diff.")

@@ -14,7 +14,6 @@ build/
 dist/
 *.egg-info/
 
-# Generated resume outputs
-resumes/enhanced_*
-resumes/diff_*
+# Resume uploads/downloads (user data)
+resumes/
 

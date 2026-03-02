@@ -1,62 +1,9 @@
-"""def main():
-    print("Hello from resume-enhancer!")
-
-
-if __name__ == "__main__":
-    main()
-"""
-
-"""from pathlib import Path
-
-def main():
-    base = Path(__file__).parent
-    resumes_dir = base / "resumes"
-
-    print("Resume Enhancer project scaffold is ready.")
-    print(f"Resumes folder: {resumes_dir}")
-
-    if resumes_dir.exists():
-        files = sorted([p.name for p in resumes_dir.iterdir() if p.is_file()])
-        print("Files in resumes/:")
-        for f in files:
-            print(" -", f)
-    else:
-        print("resumes/ folder not found (unexpected).")
-
-if __name__ == "__main__":
-    main()
-"""
-
-from pathlib import Path
-
-from resume_reader import read_resume
-
-
-"""
-def main():
-    base = Path(__file__).parent
-    resumes_dir = base / "resumes"
-
-    input_txt = resumes_dir / "input_resume.txt"
-
-    doc = read_resume(input_txt)
-
-    print("Loaded resume")
-    print("Path:", doc.path)
-    print("Type:", doc.ext)
-    print("\n--- Preview (first 400 chars) ---")
-    print(doc.text[:400])
-    print("\n--- Stats ---")
-    print("Chars:", len(doc.text))
-    print("Lines:", doc.text.count("\n") + 1)
-
-
-if __name__ == "__main__":
-    main()
-"""
-
 from pathlib import Path
 from resume_reader import read_resume
+from enhancer import enhance_resume
+from comparator import build_unified_diff
+
+allowed_ext = {".txt", ".pdf"}
 
 
 def main():
@@ -67,45 +14,64 @@ def main():
         print("resumes/ folder not found.")
         return
 
-    # 1) List available files (txt/pdf only)
-    allowed_ext = {".txt", ".pdf"}
+    #List available files (txt/pdf only)
     files = sorted([p.name for p in resumes_dir.iterdir() if p.is_file() and p.suffix.lower() in allowed_ext])
 
     if not files:
-        print("No .txt or .pdf files found in resumes/")
+        print("No files found in resumes")
         return
 
-    print("\nAvailable resume files in resumes/:")
+    print("\n Available resume files in resumes:")
     for f in files:
         print(" -", f)
 
-    # 2) Ask user which file to read
+    # Ask user which file to read
     filename = input("\nType the filename to read (exactly as shown): ").strip()
-
     if not filename:
         print("No filename entered.")
         return
-
-    target_path = resumes_dir / filename
-
-    # 3) Read + preview
-    try:
-        doc = read_resume(target_path)
-    except Exception as e:
-        print(f"Could not read '{filename}': {e}")
+    
+    role = input("Enter the target role: ").strip()
+    if not role:
+        print("No target role entered.")
         return
 
-    print("\n Loaded resume")
-    print("Path:", doc.path)
-    print("Type:", doc.ext)
+    target_path = resumes_dir / filename
+    if not target_path.exists():
+        print(f"File not found: {filename}")
+        return
+    
+    print("\nReading Resume")
+    doc=read_resume(target_path)
 
-    print("\n --- Preview (first 500 chars) ---")
-    print(doc.text[:500])
+    print("Calling LLM")
+    enhanced = enhance_resume(doc.text, target_role=role)
 
-    print("\n --- Stats ---")
-    print("Chars:", len(doc.text))
-    print("Lines:", doc.text.count("\n") + 1)
+    # Save enhanced output
+    stem = Path(filename).stem
+    enhanced_name=f"enhanced_{stem}.txt"
+    enhanced_path = resumes_dir / enhanced_name
+    enhanced_path.write_text(enhanced, encoding="utf-8")
+    
+    # Generate unified diff between original and enhanced resume
+    diff_result = build_unified_diff(
+        original_text=doc.text,
+        enhanced_text=enhanced,
+        from_name=f"{stem}_original",
+        to_name=f"{stem}_enhanced",
+    )
+    diff_name = f"diff_{stem}.txt"
+    diff_path = resumes_dir / diff_name
+    diff_path.write_text(diff_result.diff_text, encoding="utf-8")
 
+    # Save enhanced resume output
+    print("\nEnhancement Complete")
+    print("Saved enhanced to: ", enhanced_name)
+    print("Saved diff to: ", diff_name)
+    print("Diff changed lines:", diff_result.changed_lines)
+
+    print("\n --- Enhanced preview (first 500 chars) ---")
+    print(enhanced[:500])
 
 if __name__ == "__main__":
     main()

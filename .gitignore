@@ -1,3 +1,6 @@
+#Environment
+.env
+
 # Python
 __pycache__/
 *.pyc
@@ -13,4 +16,5 @@ dist/
 
 # Generated resume outputs
 resumes/enhanced_*
-resumes/sample_*
+resumes/diff_*
+
